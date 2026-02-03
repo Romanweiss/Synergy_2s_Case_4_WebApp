@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16
+    container_name: tourism_db
+    environment:
+      POSTGRES_DB: tourism
+      POSTGRES_USER: tourism
+      POSTGRES_PASSWORD: tourism
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  api:
+    build: .
+    container_name: tourism_api
+    environment:
+      DATABASE_URL: postgresql+psycopg://tourism:tourism@db:5432/tourism
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
