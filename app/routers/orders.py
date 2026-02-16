@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Select
 
 from ..db import get_db
 from ..models import Order, Tour
 from ..schemas import OrderCreate, OrderOut
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.get("", response_model=list[OrderOut])
+def list_orders(db: Session = Depends(get_db)):
+    stmt = select(Order).order_by(Order.order_id.desc())
+    return db.execute(stmt).scalars().all()
 
 
 @router.post("", response_model=OrderOut)
