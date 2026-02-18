@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session, Select
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Order, Tour
@@ -16,11 +17,8 @@ def list_orders(db: Session = Depends(get_db)):
 
 @router.post("", response_model=OrderOut)
 def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
-    # Проверим, что тур существует и активен
     tour = db.get(Tour, payload.tour_id)
     if not tour or not tour.is_active:
-        # FastAPI сам превратит это в 422/400? Лучше 404:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Tour not found or inactive")
 
     order = Order(

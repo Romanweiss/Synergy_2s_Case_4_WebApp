@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: tourism_db
     environment:
       POSTGRES_DB: tourism
@@ -9,6 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   api:
