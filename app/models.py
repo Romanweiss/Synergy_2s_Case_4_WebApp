@@ -1,4 +1,6 @@
-from sqlalchemy import String, Integer, Numeric, Boolean, Date, ForeignKey, DateTime, func
+from datetime import date, datetime
+
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -18,6 +20,17 @@ class Tour(Base):
     orders = relationship("Order", back_populates="tour")
 
 
+class Service(Base):
+    __tablename__ = "services"
+
+    service_id: Mapped[int] = mapped_column(primary_key=True)
+    service_name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    price: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    orders = relationship("Order", back_populates="service")
+
+
 class Order(Base):
     __tablename__ = "orders"
 
@@ -26,9 +39,11 @@ class Order(Base):
     phone: Mapped[str] = mapped_column(String, nullable=False)
 
     tour_id: Mapped[int] = mapped_column(ForeignKey("tours.tour_id"), nullable=False)
+    service_id: Mapped[int | None] = mapped_column(ForeignKey("services.service_id"), nullable=True)
     persons: Mapped[int] = mapped_column(Integer, nullable=False)
-    start_date: Mapped[str] = mapped_column(Date, nullable=False)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
 
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     tour = relationship("Tour", back_populates="orders")
+    service = relationship("Service", back_populates="orders")
